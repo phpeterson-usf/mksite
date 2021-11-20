@@ -1,0 +1,8 @@
+[test]
+key = "value"
+
+[timeline]
+table_headers = ['Date', 'Topics', 'Section 1', 'Section 2']
+
+[publish]
+url = "www.cs.usfca.edu:/~phpeterson/public_html/cs221"

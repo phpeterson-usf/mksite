@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+
+import toml
+import sys
+
+from index import Index
+from sidebar import Sidebar
+
+def load_cfg():
+    with open('mksite.toml', 'r') as f:
+        return toml.load(f)
+
+def main():
+    action = sys.argv[1]
+
+    index = Index()
+    sidebar = Sidebar()
+
+    if action == 'init':
+        args = {
+            'src_dir': sys.argv[2],
+            'dst_dir': '.'
+        }
+        index.init(**args)
+        sidebar.init(**args)
+    elif action == 'build':
+        cfg = load_cfg()
+        sidebar.build(cfg['sidebar'])
+    elif action == 'publish':
+        args = {
+            'dst': 'www.cs.usfca.edu:/~phpeterson'
+        }
+        index.publish(args)
+        
+if __name__ == '__main__':
+    main()
