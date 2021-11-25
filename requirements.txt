@@ -1,0 +1,4 @@
+chevron==0.14.0
+Markdown==3.3.4
+Pygments==2.10.0
+toml==0.10.2

@@ -22,7 +22,6 @@ class Base(object):
             if self.newer_file(src_path, dst_path):
                 print('copy ' + src_path + ' to ' + dst_path)
                 shutil.copy2(src_path, dst_path)
-            
 
     def markdown_newer_files(self, **kwargs):
         src_path = os.path.join('.', fname)
@@ -31,4 +30,9 @@ class Base(object):
             if self.newer_file(src_path, dst_path):
                 print('markdown ' + src_path + ' to ' + dst_path)
             
-            
+    def mustache_newer_files(self, **kwargs):
+        src_path = os.path.join('.', fname)
+        dst_path = os.path.join(kwargs['dst_dir'], fname)
+        for fname in kw_args['file_names']:
+            if self.newer_file(src_path, dst_path):
+                print('mustache ' + src_path + ' to ' + dst_path)

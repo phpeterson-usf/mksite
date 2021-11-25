@@ -1,8 +1,11 @@
-[test]
-key = "value"
+[mksite]
+#init_dir = "where you put mksite/init"
 
-[timeline]
-table_headers = ['Date', 'Topics', 'Section 1', 'Section 2']
-
+[sidebar]
+#course_number = "CS NNN"
+#course_name = "your course name"
+files
 [publish]
-url = "www.cs.usfca.edu:/~phpeterson/public_html/cs221"
+cmd = "rsync" # add git?
+src_dir = "./publish"
+dst_url = "your site URL"

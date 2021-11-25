@@ -6,8 +6,7 @@ class Sidebar(Base):
         self.copy_newer_files(**kwargs)
 
     def build(self, **kwargs):
-        kwargs['file_names'] = ['sidebar.md']
-        self.markdown_newer_files(kwargs)
+        self.mustache_newer_files(kwargs['mustache_sources'])
 
     def publish(self, **kwargs):
         pass
