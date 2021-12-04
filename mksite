@@ -1,36 +1,170 @@
 #!/usr/bin/env python3
 
-import toml
+import chevron  # mustache
+import markdown
+import os
+import shutil
 import sys
+import toml
 
-from index import Index
-from sidebar import Sidebar
+class Site(object):
+    def __init__(self, fname):
+        try:
+            with open(fname, 'r') as f:
+                self.cfg = toml.load(f)
+        except FileNotFoundError:
+            self.cfg = {}
+        mksite_dir = os.environ['MKSITE_DIR']
+        if mksite_dir:
+            self.init_dir = os.path.join(mksite_dir, 'init')
+        else:
+            raise Exception('MKSITE_DIR not found in environment')
+        self.site_dir = '.'
+        self.build_dir = os.path.join(self.site_dir, 'build')
 
-def load_cfg():
-    with open('mksite.toml', 'r') as f:
-        return toml.load(f)
+
+    def copy_file(self, src_path, dst_path):
+        shutil.copy2(src_path, dst_path)
+        print('cp ' + src_path + ' ' + dst_path)
+
+
+    # Copy boilerplate files into new site dir
+    def init(self):
+        for fname in os.listdir(self.site_dir):
+            src_path = os.path.join(self.site_dir, fname)
+            dst_path = os.path.join(self.site_dir, fname)
+            if self.newer_file(src_path, dst_path):
+                self.copy_file(src_path, dst_path)
+
+
+    # Is src_path newer than dst_path?
+    def newer_file(self, src_path, dst_path):
+        if not os.path.isfile(dst_path) or \
+            (os.path.getmtime(src_path) > os.path.getmtime(dst_path)):
+                return True
+        return False
+
+
+    # For a given source file in the site, make the path which corresponds
+    # to its target in the 'build' directory
+    def build_path(self, dst_fname):
+        return os.path.join(self.build_dir, dst_fname)
+
+
+    # For a given source path, return the path to its build target
+    def make_dst_path(self, src_path):
+        fname = os.path.split(src_path)[1]
+        base_ext = os.path.splitext(fname)
+        if base_ext[1] == '.md':
+            # foo.md generates build/foo.html
+            return self.build_path(base_ext[0] + '.html')
+        elif base_ext[1] == '.mustache':
+            # foo.md.mustache generates build/foo.md
+            # foo.html.mustache generates build/foo.html
+            return self.build_path(base_ext[0])
+        else:
+            return self.build_path(fname)
+        
+
+    def build_markdown(self, src_path, dst_path):
+        args = {
+            'input': src_path,
+            'output': dst_path,
+            'extensions': ['codehilite', 'tables', 'attr_list'],
+            'extension_configs': {
+                'codehilite': {
+                    'linenums': 'True'
+                }
+            },
+        }
+        print(f'markdown {src_path} {dst_path}')
+        markdown.markdownFromFile(**args)
+
+
+    def build_mustache(self, src_path, dst_path):
+        # handle both foo.html and foo.html.mustache
+        base = os.path.splitext(os.path.splitext(src_path)[0])[0]
+        toml_path = os.path.join(self.site_dir, base + '.toml')
+        try:
+            with open(toml_path, 'r') as toml_file:
+                vars_dict = toml.load(toml_file)
+        except FileNotFoundError:
+            vars_dict = {}
+            print(f'Expected TOML file not found: {toml_path}')
+
+        with open(src_path) as src_file:
+            print(f'chevron {src_path} {dst_path}')
+            with open(dst_path, 'w') as dst_file:
+                dst_file.write(chevron.render(src_file, vars_dict))
+            
+
+    # Create given directory
+    def make_dir(self, dir_name):
+        dir_path = os.path.join(self.site_dir, dir_name)
+        if not os.path.isdir(dir_path):
+            print(f'mkdir {dir_path}')
+            os.mkdir(dir_path)
+
+
+    # Check dst newer than src. Ignore files which aren't published
+    def needs_build(self, src_path, dst_path):
+        if os.path.isdir(src_path):
+            return False
+        if os.path.splitext(src_path)[1] == '.toml':
+            return False
+        if not self.newer_file(src_path, dst_path):
+            return False
+        return True
+
+
+    def build_one_dir(self, dir_name):
+        for fname in os.listdir(dir_name):
+            src_path = os.path.join(dir_name, fname)
+            dst_path = self.make_dst_path(src_path)
+            if not self.needs_build(src_path, dst_path):
+                continue
+            ext = os.path.splitext(src_path)[1]
+            if ext == '.mustache':
+                self.build_mustache(src_path, dst_path)
+            elif ext == '.md':
+                self.build_markdown(src_path, dst_path)
+            else:
+                self.copy_file(src_path, dst_path)
+
+
+    # Translate source files into the build directory
+    def build(self):
+        self.make_dir('build')
+        self.build_one_dir(self.site_dir)
+        # call it again for md -> html
+        self.build_one_dir(self.build_dir)
+
+
+    # Publish build directory to network location
+    def publish(self):
+        pass
+
+
+def usage():
+    print('Usage: mksite <action> where action may be init, build, or publish')
+    exit(-1)
+
 
 def main():
+    if len(sys.argv) == 1:
+        usage()
     action = sys.argv[1]
-
-    index = Index()
-    sidebar = Sidebar()
-
+    site = Site('mksite.toml')
+    
     if action == 'init':
-        args = {
-            'src_dir': sys.argv[2],
-            'dst_dir': '.'
-        }
-        index.init(**args)
-        sidebar.init(**args)
+        site.init()
     elif action == 'build':
-        cfg = load_cfg()
-        sidebar.build(cfg['sidebar'])
+        site.build()
     elif action == 'publish':
-        args = {
-            'dst': 'www.cs.usfca.edu:/~phpeterson'
-        }
-        index.publish(args)
-        
+        site.publish()
+    else:
+        usage()
+
+
 if __name__ == '__main__':
     main()
