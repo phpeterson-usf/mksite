@@ -1,0 +1,36 @@
+<html>
+	<head>
+		<base target="content">
+		<link rel="stylesheet" href="fonts.css">
+		<link rel="stylesheet" href="timeline.css">
+	</head>
+	<body>
+		<table>
+			<tr>
+				<th>Date</th>
+				<th>Topics</th>
+				<th>Section 1</th>
+			</tr>
+			{{#timeline}}
+			<tr>
+				<td>{{date}}</td>
+				<td>{{topics}}</td>
+				<td>
+					{{#section01.code}}
+						<a href="{{section01.code}}">code</a>
+					{{/section01.code}}
+					{{#section01.notes}}
+						<a href="{{section01.notes}}">notes</a>
+					{{/section01.notes}}
+					{{#section01.slides}}
+						<a href="{{section01.slides}}">slides</a>
+					{{/section01.slides}}
+					{{#section01.video}}
+						<a href="{{section01.video}}">video</a>
+					{{/section01.video}}
+				</td>
+			</tr>
+			{{/timeline}}
+		</table>
+	</body>
+</html>
