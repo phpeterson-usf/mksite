@@ -8,10 +8,11 @@ table th:nth-of-type(3) {
 }
 
 tr:nth-child(odd) {
-	border-bottom: 2px solid gray;
+	border-bottom: 1px solid white;
 }
 
 table {
+	background-color: lightgray;
 	border-spacing: 0;
 	border-collapse: collapse;
 	margin-top: 20px;
@@ -26,5 +27,6 @@ td {
 
 th {
 	text-align: left;
+	background-color: white;
 }
 

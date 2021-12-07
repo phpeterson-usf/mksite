@@ -5,3 +5,8 @@ table {
 th { 
 	text-align: left; 
 } 
+
+hr {
+	background-color: #fdbb30;
+	border: 1px solid #fdbb30
+}

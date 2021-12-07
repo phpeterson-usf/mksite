@@ -1,0 +1,26 @@
+#container {
+	width:100vw;
+}
+#sidebar {
+	display: inline-block;
+	float: left;
+	width: 20vw;
+	overflow: hidden;
+}
+#sidebar_iframe {
+	width: 20vw;
+	height: 100vw;
+	overflow: hidden;
+}
+#content {
+	display: inline-block;
+	width: 75vw;
+	float: right;
+}
+iframe {
+	border: none;
+}
+#content_iframe {
+	height: 100vw;
+	width: 75vw;
+}
