@@ -1,6 +1,6 @@
 # mksite
 
-mksite is a web site generator for tiny web sites for college courses
+mksite was an attempt to build a static site generator. I decided to use Jekyll instead 
 
 ## Why mksite?
 
